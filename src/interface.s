@@ -29,6 +29,7 @@ show_greeting:
 	movq	$greeting, %rsi
 	movq	$greeting_len, %rdx
 	syscall
+	ret
 
 #
 # Show prompt
@@ -39,6 +40,7 @@ show_prompt:
 	movq	$prompt, %rsi
 	movq	$prompt_len, %rdx
 	syscall
+	ret
 
 #
 # Exit from program with success code
