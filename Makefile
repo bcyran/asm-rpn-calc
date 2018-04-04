@@ -1,3 +1,11 @@
-asm-rpn-calc : main.s
-	gcc -g -o asm-rpn-calc main.s
+AS			= gcc
+ASFLAGS		= -g
+
+TARGET		= asm-rpn-calc
+
+SOURCES		= src/main.s
+
+
+$(TARGET) : $(SOURCES)
+	$(AS) $(ASFLAGS) -o $(TARGET) $(SOURCES)
 					
