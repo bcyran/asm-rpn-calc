@@ -29,6 +29,7 @@
 	.global greeting_len
 	.global prompt
 	.global	prompt_len
+	.global input
 
 #
 # Entry point
@@ -37,6 +38,16 @@ main:
 
 	# Show greeting
 	call	show_greeting
+	
+#
+# Main program loop
+#
+main_loop:
+	# Show prompt
+	call	show_prompt
+	# Read input
+	call	read_input
+	jmp		main_loop
 
 	# Exit from program
 	call	exit

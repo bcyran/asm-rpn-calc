@@ -18,6 +18,7 @@ INPUT_LEN = 1024
 #
 .global show_greeting
 .global show_prompt
+.global read_input
 .global exit
 
 #
@@ -39,6 +40,17 @@ show_prompt:
 	movq	$STD_OUT, %rdi
 	movq	$prompt, %rsi
 	movq	$prompt_len, %rdx
+	syscall
+	ret
+
+#
+# Read user enetered text from std in to input buffer
+#
+read_input:
+	movq	$SYS_READ, %rax
+	movq	$STD_IN, %rdi
+	movq	$input, %rsi
+	movq	$INPUT_LEN, %rdx
 	syscall
 	ret
 
