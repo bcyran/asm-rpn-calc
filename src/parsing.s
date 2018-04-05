@@ -26,6 +26,12 @@ atoi:
 	movq	$10, %rsi			# Number base for multiplication
 	movq	$0, %rcx			# Initialize the counter
 	movq	$0, %rax			# Initialize the accumulator
+	movq	$0, %r8				# Initialize negation flag
+
+	cmpb	$'-', (%rdi, %rcx, 1)		# If first char is not '-' (minus)
+	jne	atoi_loop			# Jump to loop
+	incq	%rcx				# Otherwise increment counter to skip it
+	movq	$1, %r8				# And set negation flag
 
 atoi_loop:
 	movq	$0, %rbx			# Clear rbx
@@ -46,5 +52,10 @@ atoi_loop:
 	jmp	atoi_loop			# Go to the start of the loop
 
 atoi_end:
+	cmpq	$0, %r8				# If negation flag is set to 0
+	je	atoi_return			# Jump to return
+	negq	%rax				# Otherwise negate result
+
+atoi_return:
 	ret
 
