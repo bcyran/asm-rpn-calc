@@ -47,7 +47,7 @@ main_loop:
 	call	show_prompt
 	# Read input
 	call	read_input
-	jmp		main_loop
+	jmp	main_loop
 
 	# Exit from program
 	call	exit

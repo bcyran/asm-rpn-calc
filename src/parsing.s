@@ -23,27 +23,27 @@ calculate:
 # 	rax - value of number stored in string
 #
 atoi:
-	movq	$10, %rsi				# Number base for multiplication
-	movq	$0, %rcx				# Initialize the counter
-	movq	$0, %rax				# Initialize the accumulator
+	movq	$10, %rsi			# Number base for multiplication
+	movq	$0, %rcx			# Initialize the counter
+	movq	$0, %rax			# Initialize the accumulator
 
 atoi_loop:
-	movq	$0, %rbx				# Clear rbx
-	movb	(%rdi, %rcx, 1), %bl	# Get the next char to bl
+	movq	$0, %rbx			# Clear rbx
+	movb	(%rdi, %rcx, 1), %bl		# Get the next char to bl
 
-	cmpb	$'\n', %bl				# End if char is newline
-	je		atoi_end
-	cmpb	$'0', %bl				# End if char is lower than 0
-	jb		atoi_end
-	cmpb	$'9', %bl				# End if char is greater than 9
-	ja		atoi_end
+	cmpb	$'\n', %bl			# End if char is newline
+	je	atoi_end
+	cmpb	$'0', %bl			# End if char is lower than 0
+	jb	atoi_end
+	cmpb	$'9', %bl			# End if char is greater than 9
+	ja	atoi_end
 
-	subb	$'0', %bl				# Convert ASCII to digit
-	mulq	%rsi					# Multiply current sum by 10
-	addq	%rbx, %rax				# Add current digit to the sum
+	subb	$'0', %bl			# Convert ASCII to digit
+	mulq	%rsi				# Multiply current sum by 10
+	addq	%rbx, %rax			# Add current digit to the sum
 
-	incq	%rcx					# Increment counter
-	jmp		atoi_loop				# Go to the start of the loop
+	incq	%rcx				# Increment counter
+	jmp	atoi_loop			# Go to the start of the loop
 
 atoi_end:
 	ret
