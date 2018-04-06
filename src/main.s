@@ -22,6 +22,9 @@
 .bss
 	# User input buffer
 	.comm input, 1024
+	# Temporary storage space
+	.comm tmp, 1024
+
 
 #
 # Program
@@ -34,6 +37,7 @@
 	.global prompt
 	.global	prompt_len
 	.global input
+	.global tmp
 
 #
 # Entry point
