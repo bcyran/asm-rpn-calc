@@ -5,32 +5,29 @@
 # Initialized data
 #
 .data
-	# Size of the input buffer
-	INPUT_LEN = 1024
+	INPUT_LEN = 1024			# Size of the input buffer
 
 	# Greeting message shown on program start
 	greeting: .ascii "Kalkulator wyrażeń w odwrotnej notacji polskiej, podaj wyrażenie po znaku '>'.\n"
-	greeting_len = . - greeting
+	greeting_len = . - greeting		# Length of the greeting message
 
 	# Prompt for next calculation
 	prompt: .ascii "> "
-	prompt_len = . - prompt
+	prompt_len = . - prompt			# Length of the prompt
 
 #
 # Uninitialized data
 #
 .bss
-	# User input buffer
-	.comm input, 1024
-	# Temporary storage space
-	.comm tmp, 1024
+	.comm input, 1024			# User input buffer
+	.comm tmp, 1024				# Temporary storage space
 
 
 #
 # Program
 #
 .text
-	.global main
+	.global main				# Declare global function and variables
 	.global INPUT_LEN
 	.global	greeting
 	.global greeting_len
@@ -43,26 +40,19 @@
 # Entry point
 #
 main:
-
-	# Show greeting
-	call	show_greeting
+	call	show_greeting			# Shwo greeting message
 	
 #
 # Main program loop
 #
 main_loop:
-	# Show prompt
-	call	show_prompt
-	# Read input
-	call	read_input
+	call	show_prompt			# Show prompt
+	call	read_input			# Read user input
 
-	# Parameter for calculate (input buffer)
-	movq	$input, %rdi
-	# Calculate value of the expression
-	call	calculate
+	movq	$input, %rdi			# Parameter for calculate function (input buffer)
+	call	calculate			# Calculate value of the expression
 
-	jmp	main_loop
+	jmp	main_loop			# Jump to the start of the loop
 
-	# Exit from program
-	call	exit
+	call	exit				# Exit from program
 	
