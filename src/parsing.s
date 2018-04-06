@@ -23,6 +23,12 @@ calculate:
 # 	rax - value of number stored in string
 #
 atoi:
+	pushq	%rsi				# Backup registers used by the function
+	pushq	%rcx
+	pushq	%r8
+	pushq	%rbx
+	pushq	%rdx
+
 	movq	$10, %rsi			# Number base for multiplication
 	movq	$0, %rcx			# Initialize the counter
 	movq	$0, %rax			# Initialize the accumulator
@@ -57,5 +63,10 @@ atoi_end:
 	negq	%rax				# Otherwise negate result
 
 atoi_return:
+	popq	%rdx				# Restore values of modified registers
+	popq	%rbx
+	popq	%r8
+	popq	%rcx
+	popq	%rsi
 	ret
 
