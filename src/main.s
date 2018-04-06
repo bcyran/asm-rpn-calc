@@ -5,6 +5,9 @@
 # Initialized data
 #
 .data
+	# Size of the input buffer
+	INPUT_LEN = 1024
+
 	# Greeting message shown on program start
 	greeting: .ascii "Kalkulator wyrażeń w odwrotnej notacji polskiej, podaj wyrażenie po znaku '>'.\n"
 	greeting_len = . - greeting
@@ -25,6 +28,7 @@
 #
 .text
 	.global main
+	.global INPUT_LEN
 	.global	greeting
 	.global greeting_len
 	.global prompt

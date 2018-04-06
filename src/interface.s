@@ -11,7 +11,6 @@ SYS_EXIT = 60
 STD_IN = 0
 STD_OUT = 1
 EXIT_SUCCESS = 0
-INPUT_LEN = 1024
 
 #
 # Global functions decalrations
