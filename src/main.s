@@ -55,6 +55,12 @@ main_loop:
 	call	show_prompt
 	# Read input
 	call	read_input
+
+	# Parameter for calculate (input buffer)
+	movq	$input, %rdi
+	# Calculate value of the expression
+	call	calculate
+
 	jmp	main_loop
 
 	# Exit from program

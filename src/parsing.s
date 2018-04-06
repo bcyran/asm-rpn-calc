@@ -9,9 +9,34 @@
 
 #
 # Calculate value of expression in input buffer
+# 
+# params:
+#	rdi - address of input buffer
+#
+# return:
+#	st0 - result
 #
 calculate:
-	// TODO Calculate value of the RPN expression	
+	movq	$0, %rcx			# Initialize counter
+
+calculate_loop:
+	push	%rdi				# Clear token buffer
+	movq	$tmp, %rdi
+	movq	$INPUT_LEN, %rsi
+	call	clear_buffer
+	popq	%rdi
+
+	movq	$tmp, %rsi			# get_token param (output buffer)
+	movq	%rcx, %rdx			# get_token param (starting index)
+	call	get_token			# Get the next token
+	
+	cmpq	%rcx, %rax			# Empty substring means end of string
+	je	calculate_return		# So end function
+
+	movq	%rax, %rcx			# Update counter to end index of substring
+	jmp	calculate_loop			# Jump to the start of the loop
+
+calculate_return:
 	ret
 
 #
