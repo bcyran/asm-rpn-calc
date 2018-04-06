@@ -13,6 +13,8 @@
 # params:
 #	rdi - base
 #	rsi - exponent
+# return:
+#	rax - result
 #
 int_pow:
 	pushq	%rcx				# Backup registers

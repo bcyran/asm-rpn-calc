@@ -108,7 +108,6 @@ atof_frac_loop_end:
 	call	int_pow				# Calculate denominator by raising 10 to powwer od fraction counter
 	movq	%rax, -8(%rsp)			# Move denominator to memory for FPU division
 
-
 	fidiv	-8(%rsp)			# Divide numerator in st0 by denominator
 	faddp					# Add fraction part in st0  to the integer part in st1
 
