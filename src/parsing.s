@@ -15,6 +15,48 @@ calculate:
 	ret
 
 #
+# Finds substring from given starting index to next space in input buffer and puts found substring in output buffer.
+#
+# params:
+#	rdi - address of input buffer
+#	rsi - address of output buffer
+#	rdx - starting index
+# return:
+#	rax - end index of the substring
+#
+get_token:
+	pushq	%rcx				# Backup modified registers
+	pushq	%rbx
+
+	movq	%rdx, %rax			# Initialize input counter
+	movq	$0, %rcx			# Initialize substring counter
+
+get_token_loop:
+	movb	(%rdi, %rax, 1), %bl		# Get next chat to bl
+
+	cmpb	$'\n', %bl			# End if char is newline
+	je	get_token_return
+	
+	cmpb	$' ', %bl			# If char is space
+	je	get_token_space			# Handle this case
+
+	movb	%bl, (%rsi, %rcx, 1)		# Otherwise copy current char to output buffer
+	incq	%rax				# Increment input counter
+	incq	%rcx				# And substring counter
+	jmp	get_token_loop			# Jump to the start of the lopp
+
+get_token_space:				# Handle space as current char
+	cmpq	$0, %rcx			# If substring counter is not equal zero
+	jne	get_token_return		# End function
+	incq	%rax				# Otherwise increment input counter to skip the space
+	jmp	get_token_loop			# End jump to the start of the loop
+
+get_token_return:
+	popq	%rbx				# Restore registers
+	popq	%rcx
+	ret
+
+#
 # Converts ASCII string to float
 #
 # params:
