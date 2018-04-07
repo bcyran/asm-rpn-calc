@@ -35,15 +35,39 @@ calculate_loop:
 	je	calculate_return		# So end function
 
 	cmpq	$1, %rdx			# Token can't be an operand if it's longer than 1 char
-	ja	calculate_loop_number		# So handle it as a number
+	ja	calculate_loop_number
+	cmpb	$'0', cur_token(, 1)		# It's operand if it's beyond 0
+	jb	calculate_loop_operand
+	cmpb	$'9', cur_token(, 1)		# It's operand if it's above 9
+	ja	calculate_loop_operand
+	jmp	calculate_loop_number		# Otherwise it's a number
 
-calculate_loop_addition:
+calculate_loop_operand:
+	call	pop_to_fpu			# Pop two arguments from the stack
+	call	pop_to_fpu
+
+calculate_loop_add:				# Addition
 	cmpb	$'+', cur_token(, 1)		# If operand is not '+' (plus)
-	jne	calculate_loop_subtraction	# Jump to subtraction
-	call	rpn_add				# Otherwise perform addition
+	jne	calculate_loop_sub		# Jump to subtraction
+	faddp
 	jmp	calculate_loop_end		# And jump to the end of the loop
 
-calculate_loop_subtraction:
+calculate_loop_sub:				# Subtraction
+	cmpb	$'-', cur_token(, 1)
+	jne	calculate_loop_mul
+	fsubp
+	jmp	calculate_loop_end
+
+calculate_loop_mul:				# Multiplication
+	cmpb	$'*', cur_token(, 1)
+	jne	calculate_loop_div
+	fmulp
+	jmp	calculate_loop_end
+
+calculate_loop_div:				# Division
+	cmpb	$'/', cur_token(, 1)
+	jne	calculate_loop_number
+	fdivp
 	jmp	calculate_loop_end
 
 calculate_loop_number:
@@ -51,17 +75,14 @@ calculate_loop_number:
 	movq	$cur_token, %rdi
 	call	atof
 	popq	%rdi
-	subq	$4, %rsp			# Store number on the stack
-	fstp	(%rsp)
-
+	
 calculate_loop_end:
+	call	push_from_fpu			# Push new number or result to the stack
 	movq	%rbx, %rcx			# Update counter to end index of substring
 	jmp	calculate_loop			# Jump to the start of the loop
 
-
 calculate_return:
-	fld	(%rsp)				# Return result to the st0
-	addq	$4, %rsp
+	call	pop_to_fpu
 	ret
 
 #

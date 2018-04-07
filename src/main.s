@@ -20,6 +20,7 @@
 #
 .bss
 	.comm input, 1024			# User input buffer
+	.comm cur_token, 1024			# Token storage for parser
 	.comm tmp, 1024				# Temporary storage space
 
 
@@ -34,6 +35,7 @@
 	.global prompt
 	.global	prompt_len
 	.global input
+	.global cur_token
 	.global tmp
 
 #
@@ -51,6 +53,8 @@ main_loop:
 
 	movq	$input, %rdi			# Parameter for calculate function (input buffer)
 	call	calculate			# Calculate value of the expression
+	
+	test:
 
 	jmp	main_loop			# Jump to the start of the loop
 
