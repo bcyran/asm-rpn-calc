@@ -20,23 +20,48 @@ calculate:
 	movq	$0, %rcx			# Initialize counter
 
 calculate_loop:
-	push	%rdi				# Clear token buffer
-	movq	$tmp, %rdi
+	pushq	%rdi				# Clear token buffer
+	movq	$cur_token, %rdi
 	movq	$INPUT_LEN, %rsi
 	call	clear_buffer
 	popq	%rdi
 
-	movq	$tmp, %rsi			# get_token param (output buffer)
+	movq	$cur_token, %rsi		# get_token param (output buffer)
 	movq	%rcx, %rdx			# get_token param (starting index)
 	call	get_token			# Get the next token
-	
-	cmpq	%rcx, %rax			# Empty substring means end of string
+
+	movq	%rax, %rbx			# Copy token end index
+	cmpq	$0, %rdx			# Empty token means end of string
 	je	calculate_return		# So end function
 
-	movq	%rax, %rcx			# Update counter to end index of substring
+	cmpq	$1, %rdx			# Token can't be an operand if it's longer than 1 char
+	ja	calculate_loop_number		# So handle it as a number
+
+calculate_loop_addition:
+	cmpb	$'+', cur_token(, 1)		# If operand is not '+' (plus)
+	jne	calculate_loop_subtraction	# Jump to subtraction
+	call	rpn_add				# Otherwise perform addition
+	jmp	calculate_loop_end		# And jump to the end of the loop
+
+calculate_loop_subtraction:
+	jmp	calculate_loop_end
+
+calculate_loop_number:
+	pushq	%rdi				# Convert token to float
+	movq	$cur_token, %rdi
+	call	atof
+	popq	%rdi
+	subq	$4, %rsp			# Store number on the stack
+	fstp	(%rsp)
+
+calculate_loop_end:
+	movq	%rbx, %rcx			# Update counter to end index of substring
 	jmp	calculate_loop			# Jump to the start of the loop
 
+
 calculate_return:
+	fld	(%rsp)				# Return result to the st0
+	addq	$4, %rsp
 	ret
 
 #
@@ -48,6 +73,7 @@ calculate_return:
 #	rdx - starting index
 # return:
 #	rax - end index of the substring
+#	rdx - length of the substring
 #
 get_token:
 	pushq	%rcx				# Backup modified registers
@@ -77,6 +103,7 @@ get_token_space:				# Handle space as current char
 	jmp	get_token_loop			# End jump to the start of the loop
 
 get_token_return:
+	movq	%rcx, %rdx
 	popq	%rbx				# Restore registers
 	popq	%rcx
 	ret
