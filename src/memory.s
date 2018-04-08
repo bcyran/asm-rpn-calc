@@ -34,16 +34,16 @@ clear_buffer_return:
 # Pops float number from the stack and pushes it to FPU
 #
 pop_to_fpu:
-	fld	8(%rsp)				# Skip return address and load number to FPU
-	ret	$4				# Return and free 4 bytes left after popping float
+	fldl	8(%rsp)				# Skip return address and load number to FPU
+	ret	$8				# Return and free 8 bytes left after popping float
 
 #
 # Pops float number from FPU and pushes it on the stack
 #
 push_from_fpu:
 	movq	(%rsp), %rax			# Make space for float by
-	movq	%rax, -4(%rsp)			# copying return address 4 bytes lower
-	subq	$4, %rsp			# Move stack pointer accordingly
-	fstp	8(%rsp)				# Store float in created space
+	movq	%rax, -8(%rsp)			# copying return address 8 bytes lower
+	subq	$8, %rsp			# Move stack pointer accordingly
+	fstpl	8(%rsp)				# Store float in created space
 	ret					# Return to moved address
 

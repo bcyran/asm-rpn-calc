@@ -63,7 +63,7 @@ atof_int_loop_end:				# Convert and load extracted integer part to FPU
 	call	atoi				# Convert integer part to int
 	popq	%rdi				# Restore parameter
 	movq	%rax, -8(%rsp)			# Move converted number to stack's red zone
-	fild	-8(%rsp)			# Load number to FPU
+	fildq	-8(%rsp)			# Load number to FPU
 	
 	cmpb	$'.', %bl			# If last character wasn't a period
 	jne	atof_sign			# End function
@@ -96,7 +96,7 @@ atof_frac_loop_end:
 	movq	$tmp, %rdi			# Parameter for atoi, no need to backup
 	call	atoi				# Convert frac part to int
 	movq	%rax, -8(%rsp)			# Move converted number to stack's red zone
-	fild	-8(%rsp)			# Load number into the FPU
+	fildq	-8(%rsp)			# Load number into the FPU
 
 	movq	$10, %rdi			# int_pow parameter (base)
 	movq	%rdx, %rsi			# int_pow parameter (exponent)
