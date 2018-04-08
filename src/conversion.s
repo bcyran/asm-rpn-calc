@@ -66,7 +66,7 @@ atof_int_loop_end:				# Convert and load extracted integer part to FPU
 	fild	-8(%rsp)			# Load number to FPU
 	
 	cmpb	$'.', %bl			# If last character wasn't a period
-	jne	atof_return			# End function
+	jne	atof_sign			# End function
 	incq	%rcx				# If last char was a period increment counter to skip it 
 	movq	$0, %rdx			# Initialize fraction part counter
 
@@ -106,8 +106,9 @@ atof_frac_loop_end:
 	fidiv	-8(%rsp)			# Divide numerator in st0 by denominator
 	faddp					# Add fraction part in st0  to the integer part in st1
 
+atof_sign:
 	cmpq	$0, %r8				# If negation flag is set to 0
-	je	atoi_return			# Jump to return
+	je	atof_return			# Jump to return
 	fchs					# Otherwise negate st0
 	
 atof_return:
