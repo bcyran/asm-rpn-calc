@@ -7,6 +7,7 @@
 #
 .global atof
 .global atoi
+.global ftoa
 .global itoa
 
 #
@@ -173,6 +174,85 @@ atoi_return:
 	popq	%r8
 	popq	%rcx
 	popq	%rsi
+	ret
+
+#
+# Converts float number to ASCII string
+#
+# params:
+#	st0 - float number to convert
+#	rdi - address of output buffer
+#	rsi - precision of the conversion (number of decimal places)
+# return:
+#	rax - length of the output string
+#
+ftoa:
+	pushq	%rbx				# Backup registers
+	pushq	%rcx
+	pushq	%rdx
+	pushq	%r8
+
+
+	movq	$0, %r8				# Initialize the negation flag
+	movq	$0, %rcx			# Initialize output char counter
+
+	pushq	%rdi				# Backup rdi
+	movq	$10, %rdi			# Parameter for int_pow (base), exponent already in rsi
+	call	int_pow				# Calculate fraction denominator (10^precision)
+	popq	%rdi				# Restore rdi
+	movq	%rax, -8(%rsp)			# Put denominator in stack's red zone
+	movq	%rax, %rbx			# Save denominator for later division
+
+	fimul	-8(%rsp)			# Multiply number by fraction denominator
+	frndint					# Round the number to the nearest integer
+
+	movq	$0, -8(%rsp)			# Clear red zone
+	fistpq	-8(%rsp)			# Store number in red zone
+	movq	-8(%rsp), %rax			# Move number to the accumulator
+	
+	cmpq	$0, %rax			# If number is not negative
+	jge	ftoa_integer			# Go to conversion
+	negq	%rax				# Otherwise negate the number
+	movq	$1, %r8				# Set negation flag
+	movb	$'-', (%rdi, %rcx, 1)		# Set '-' ad first char of output
+	incq	%rcx				# Increment output counter
+
+ftoa_integer:
+	movq	$0, %rdx			# Clear rdx for division
+	divq	%rbx				# Divide number by fraction part denominator
+
+	pushq	%rdi				# Backup parameters
+	pushq	%rsi
+	addq	%rcx, %rdi			# Add char counter to the output address
+	movq	%rdi, %rsi			# Parameter fot itoa (output)
+	movq	%rax, %rdi			# Parameter for itoa (number)
+	call	itoa				# Convert integer part to string
+	popq	%rsi				# Restore parameters
+	popq	%rdi
+
+	addq	%rax, %rcx			# Update char counter
+	decq	%rcx				# Decrement char counter to overwrite integer newline
+	movb	$'.', (%rdi, %rcx, 1)		# Add decimal point
+	incq	%rcx				# Increment char counter
+
+ftoa_fraction:
+	pushq	%rdi
+	pushq	%rsi
+	addq	%rcx, %rdi			# Add char counter to the output address
+	movq	%rdi, %rsi			# itoa parameter
+	movq	%rdx, %rdi			# itoa parameter
+	call	itoa				# Convert fraction part
+	popq	%rsi
+	popq	%rdi
+	addq	%rax, %rcx			# Update char counter
+
+	movq	%rcx, %rax			# Return length of the string
+
+	popq	%r8				# Restore registers
+	popq	%rdx
+	popq	%rcx
+	popq	%rbx
+		
 	ret
 
 #
