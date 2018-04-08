@@ -16,11 +16,41 @@ EXIT_SUCCESS = 0
 #
 # Global functions decalrations
 #
+.global repl
 .global show_greeting
 .global show_prompt
 .global read_input
 .global print_string
 .global exit
+
+#
+# Read-Eval-Print Loop
+#
+repl:
+	call	show_prompt			# Show prompt
+
+	movq	$input, %rdi			# Parameter for clean_buffer (buffer to clean)
+	movq	$INPUT_LEN, %rsi		# Parameter for clean_buffer (length of the buffer)
+	call	clear_buffer			# Clear input buffer
+
+	call	read_input			# Read user input
+	
+	cmpb	$'q', input			# If entered char is 'q'
+	je	exit				# End program
+
+	movq	$input, %rdi			# Parameter for calculate (input buffer)
+	call	calculate			# Calculate value of the expression
+
+	movq	$output, %rdi			# Parameter for ftoa (output buffer)
+	movq	$2, %rsi			# Parameter for ftoa (precision)
+	call	ftoa				# Convert result to ASCII string
+
+	movq	$output, %rdi			# Parameter for print_string (buffer to print)
+	movq	%rax, %rsi			# Parameter fro print_string (number of char to print)
+	call	print_string			# Print result
+
+	jmp	repl				# Jump to the start of the loop
+	ret
 
 #
 # Shows greeting text
