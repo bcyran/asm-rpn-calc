@@ -66,8 +66,14 @@ calculate_loop_mul:				# Multiplication
 
 calculate_loop_div:				# Division
 	cmpb	$'/', cur_token
-	jne	calculate_loop_number
+	jne	calculate_loop_pow
 	fdivp
+	jmp	calculate_loop_end
+
+calculate_loop_pow:
+	cmpb	$'^', cur_token
+	jne	calculate_loop_number
+	call	float_pow
 	jmp	calculate_loop_end
 
 calculate_loop_number:
