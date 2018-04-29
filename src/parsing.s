@@ -36,9 +36,9 @@ calculate_loop:
 
 	cmpq	$1, %rdx			# Token can't be an operand if it's longer than 1 char
 	ja	calculate_loop_number
-	cmpb	$'0', cur_token(, 1)		# It's operand if it's beyond 0
+	cmpb	$'0', cur_token			# It's operand if it's beyond 0
 	jb	calculate_loop_operand
-	cmpb	$'9', cur_token(, 1)		# It's operand if it's above 9
+	cmpb	$'9', cur_token			# It's operand if it's above 9
 	ja	calculate_loop_operand
 	jmp	calculate_loop_number		# Otherwise it's a number
 
@@ -47,25 +47,25 @@ calculate_loop_operand:
 	call	pop_to_fpu
 
 calculate_loop_add:				# Addition
-	cmpb	$'+', cur_token(, 1)		# If operand is not '+' (plus)
+	cmpb	$'+', cur_token			# If operand is not '+' (plus)
 	jne	calculate_loop_sub		# Jump to subtraction
 	faddp
 	jmp	calculate_loop_end		# And jump to the end of the loop
 
 calculate_loop_sub:				# Subtraction
-	cmpb	$'-', cur_token(, 1)
+	cmpb	$'-', cur_token
 	jne	calculate_loop_mul
 	fsubp
 	jmp	calculate_loop_end
 
 calculate_loop_mul:				# Multiplication
-	cmpb	$'*', cur_token(, 1)
+	cmpb	$'*', cur_token
 	jne	calculate_loop_div
 	fmulp
 	jmp	calculate_loop_end
 
 calculate_loop_div:				# Division
-	cmpb	$'/', cur_token(, 1)
+	cmpb	$'/', cur_token
 	jne	calculate_loop_number
 	fdivp
 	jmp	calculate_loop_end
