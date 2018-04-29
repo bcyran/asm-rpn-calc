@@ -191,6 +191,8 @@ ftoa:
 	pushq	%rcx
 	pushq	%rdx
 	pushq	%r8
+	pushq	%r9
+	pushq	%r10
 
 
 	movq	$0, %r8				# Initialize the negation flag
@@ -246,8 +248,35 @@ ftoa_fraction:
 	popq	%rdi
 	addq	%rax, %rcx			# Update char counter
 
+	movq	%rsi, %rdx			# Copy of precision
+	subq	%rax, %rdx			# Subtract fraction part length from precision to calculate offset
+	incq	%rdx				# Add 1 to account for newline char
+
+	cmpq	$0, %rdx			# Skip adding leading zeros
+	je	ftoa_return			# If offset equals zero
+
+	movq	%rcx, %r9			# Copy of the counter (source counter)
+	decq	%r9				# Move counter to the last char
+	movq	%r9, %r10			# Copy of the source counter (destination counter)
+	addq	%rdx, %r10			# Add offset to destintation counter
+	addq	%rdx, %rcx			# Update total char counter
+	movq	%rax, %rdx			# Copy fraction length
+
+leading_zeros:
+	movb	(%rdi, %r9, 1), %al		# Copy source char to al
+	movb	$'0', (%rdi, %r9, 1)		# Put '0' in place of source char
+	movb	%al, (%rdi, %r10, 1)		# Copy char to its destination
+	decq	%r9				# Decrement source counter
+	decq	%r10				# Decrement destination counter
+	decq	%rdx				# Decrement fraction part counter
+	cmpq	$0, %rdx			# Repeat this
+	ja	leading_zeros			# For entire fraction part
+
+ftoa_return:
 	movq	%rcx, %rax			# Return length of the string
 
+	popq	%r10
+	popq	%r9
 	popq	%r8				# Restore registers
 	popq	%rdx
 	popq	%rcx
