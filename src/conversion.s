@@ -191,9 +191,6 @@ ftoa:
 	pushq	%rcx
 	pushq	%rdx
 	pushq	%r8
-	pushq	%r9
-	pushq	%r10
-
 
 	movq	$0, %r8				# Initialize the negation flag
 	movq	$0, %rcx			# Initialize output char counter
@@ -233,6 +230,10 @@ ftoa_integer:
 	popq	%rdi
 
 	addq	%rax, %rcx			# Update char counter
+
+	cmpq	$0, %rsi			# End here if precision is set to 0
+	je	ftoa_return
+	
 	decq	%rcx				# Decrement char counter to overwrite integer newline
 	movb	$'.', (%rdi, %rcx, 1)		# Add decimal point
 	incq	%rcx				# Increment char counter
@@ -246,6 +247,7 @@ ftoa_fraction:
 	call	itoa				# Convert fraction part
 	popq	%rsi
 	popq	%rdi
+
 	addq	%rax, %rcx			# Update char counter
 
 	movq	%rsi, %rdx			# Copy of precision
@@ -253,30 +255,34 @@ ftoa_fraction:
 	incq	%rdx				# Add 1 to account for newline char
 
 	cmpq	$0, %rdx			# Skip adding leading zeros
-	je	ftoa_return			# If offset equals zero
+	jle	ftoa_return			# If offset equals zero
 
-	movq	%rcx, %r9			# Copy of the counter (source counter)
-	decq	%r9				# Move counter to the last char
-	movq	%r9, %r10			# Copy of the source counter (destination counter)
-	addq	%rdx, %r10			# Add offset to destintation counter
-	addq	%rdx, %rcx			# Update total char counter
-	movq	%rax, %rdx			# Copy fraction length
+leading_zeros:					# Add missing leading zeros to fraction e.g. 0.1 -> 0.0001
+	pushq	%rsi				# Backup registers
+	pushq	%rdi
+	pushq	%rcx
+	pushq	%rax
+	movq	%rdi, %rsi			# Source - Copy address of the buffer
+	addq	%rcx, %rsi			# Add char counter
+	decq	%rsi				# Decrement to point to the last char
+	movq	%rsi, %rdi			# Destination - Copy source address to destination
+	addq	%rdx, %rdi			# Source address + offset
+	movq	%rax, %rcx			# Count - fraction length
+	std					# Direction - decrement
+	rep	movsb				# Move fraction part by offset
+	movq	$'0', %rax			# Fill character - '0' character
+	movq	%rdx, %rcx			# Count - offset
+	rep	stosb				# Fill gap with zeros
+	popq	%rax				# Restore registers
+	popq	%rcx
+	popq	%rdi
+	popq	%rsi
 
-leading_zeros:
-	movb	(%rdi, %r9, 1), %al		# Copy source char to al
-	movb	$'0', (%rdi, %r9, 1)		# Put '0' in place of source char
-	movb	%al, (%rdi, %r10, 1)		# Copy char to its destination
-	decq	%r9				# Decrement source counter
-	decq	%r10				# Decrement destination counter
-	decq	%rdx				# Decrement fraction part counter
-	cmpq	$0, %rdx			# Repeat this
-	ja	leading_zeros			# For entire fraction part
+	addq	%rdx, %rcx			# Update char counter with offset
 
 ftoa_return:
 	movq	%rcx, %rax			# Return length of the string
 
-	popq	%r10
-	popq	%r9
 	popq	%r8				# Restore registers
 	popq	%rdx
 	popq	%rcx
