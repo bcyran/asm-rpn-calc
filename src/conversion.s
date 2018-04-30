@@ -3,6 +3,17 @@
 #
 
 #
+# Initialized data
+#
+.data
+	nan: .ascii "NaN\n"			# NaN string
+	nan_len = . - nan			# NaN string length
+	inf: .ascii "inf\n"			# Infinity string
+	inf_len = . - inf			# Infinity string length
+
+.text
+
+#
 # Global functions declarations
 #
 .global atof
@@ -210,6 +221,28 @@ ftoa:
 	movq	$0, %r8				# Initialize the negation flag
 	movq	$0, %rcx			# Initialize output char counter
 
+	fxam					# Examine number in st0
+	fstsw	%ax				# Store FPU status word in ax
+	andw	$0b0100010100000000, %ax	# Clean all bits besides C0, C2, C3
+	cmpw	$0b0000000100000000, %ax	# Check if number is NaN (only C0)
+	je	ftoa_nan			# And display NaN if it is
+	cmpw	$0b0000010100000000, %ax	# Check if number is inf (C0 and C2)
+	je	ftoa_inf			# And display inf if it is
+	jmp	ftoa_number			# Otherwise treat it as a number
+
+ftoa_nan:					# Display NaN
+	movl	nan, %eax			# Copy NaN string to eax
+	movl	%eax, (%rdi)			# Copy NaN string to the output
+	movq	$nan_len, %rcx			# Add NaN string length to the counter
+	jmp	ftoa_return			# Return
+
+ftoa_inf:					# Display inf
+	movl	inf, %eax			# Copy inf string to eax
+	movl	%eax, (%rdi)			# Copy inf string to the output
+	movq	$inf_len, %rcx			# Add inf string length to the counter
+	jmp	ftoa_return			# Return
+
+ftoa_number:
 	pushq	%rdi				# Backup rdi
 	movq	$10, %rdi			# Parameter for int_pow (base), exponent already in rsi
 	call	int_pow				# Calculate fraction denominator (10^precision)

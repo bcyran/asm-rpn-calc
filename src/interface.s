@@ -3,15 +3,30 @@
 # 
 
 #
-# Constants
+# Initialized data
 #
-SYS_READ = 0
-SYS_WRITE = 1
-SYS_IOCTL = 16
-SYS_EXIT = 60
-STD_IN = 0
-STD_OUT = 1
-EXIT_SUCCESS = 0
+.data
+	SYS_READ = 0
+	SYS_WRITE = 1
+	SYS_IOCTL = 16
+	SYS_EXIT = 60
+	STD_IN = 0
+	STD_OUT = 1
+	EXIT_SUCCESS = 0
+
+	# Greeting message shown on program start
+	greeting: .ascii "Kalkulator wyrażeń w odwrotnej notacji polskiej, podaj wyrażenie po znaku '>'.\n"
+	greeting_len = . - greeting		# Length of the greeting message
+
+	# Prompt for next calculation
+	prompt: .ascii "> "
+	prompt_len = . - prompt			# Length of the prompt
+
+	# Expression error
+	error_msg: .ascii "Niepoprawne wyrażenie!\n"
+	error_msg_len = . - error_msg		# Length
+
+.text
 
 #
 # Global functions decalrations

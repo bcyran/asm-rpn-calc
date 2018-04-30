@@ -6,30 +6,9 @@
 #
 .data
 	INPUT_LEN = 1024			# Size of the input buffer
-
-	# Greeting message shown on program start
-	greeting: .ascii "Kalkulator wyrażeń w odwrotnej notacji polskiej, podaj wyrażenie po znaku '>'.\n"
-	greeting_len = . - greeting		# Length of the greeting message
-
-	# Prompt for next calculation
-	prompt: .ascii "> "
-	prompt_len = . - prompt			# Length of the prompt
-
-	# Expression error
-	error_msg: .ascii "Niepoprawne wyrażenie!\n"
-	error_msg_len = . - error_msg		# Length
-
 	precision: .int 2			# Default calculation precision
-
 	stack_counter: .int 0			# RPN stack counter
 	
-	# Function names
-	fx_sqrt: .ascii "sqrt"			# Square root
-	fx_sin: .ascii "sin\0"			# Sine
-	fx_cos: .ascii "cos\0"			# Cosine
-	fx_abs: .ascii "abs\0"			# Absolute value
-	fx_setp: .ascii "setp"			# Set precision
-
 #
 # Uninitialized data
 #
@@ -39,29 +18,14 @@
 	.comm output, 1024			# Output buffer
 	.comm tmp, 1024				# Temporary storage space
 
-
 #
 # Program
 #
 .text
 	.global main				# Declare global function and variables
 	.global INPUT_LEN
-	.global	greeting
-	.global greeting_len
-	.global prompt
-	.global	prompt_len
-	.global error_msg
-	.global error_msg_len
-	.global input
-	.global cur_token
-	.global tmp
 	.global precision
 	.global stack_counter
-	.global	fx_sqrt
-	.global	fx_sin
-	.global fx_cos
-	.global fx_abs
-	.global fx_setp
 
 #
 # Entry point
