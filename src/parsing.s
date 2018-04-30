@@ -143,7 +143,7 @@ calculate_loop_end:
 	cmpq	$-1, %rax			# If one of the pops returned error
 	je	calculate_parsing_error		# Return parsing error
 	fstsw	%ax				# Store FPU status word in ax
-	andw	$0b0000000000111111, %ax	# Clean all flags besides error summary
+	andw	$0b0000000000011111, %ax	# Clean all flags besides error summary
 	cmpw	$0, %ax				# If error summary flag is set
 	jne	calculate_fpu_error		# Return FPU error
 	call	push_from_fpu			# Push new number or result to the stack
