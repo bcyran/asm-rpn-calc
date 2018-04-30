@@ -95,9 +95,16 @@ calculate_loop_sin:				# Sine
 
 calculate_loop_cos:				# Cosine
 	cmpl	%eax, fx_cos
-	jne	calculate_loop_number
+	jne	calculate_loop_abs
 	call	pop_to_fpu
 	fcos
+	jmp	calculate_loop_end
+
+calculate_loop_abs:				# Absolute value
+	cmpl	%eax, fx_abs
+	jne	calculate_loop_number
+	call	pop_to_fpu
+	fabs
 	jmp	calculate_loop_end
 
 calculate_loop_number:
