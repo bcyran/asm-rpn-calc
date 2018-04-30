@@ -45,7 +45,7 @@ calculate_loop:
 
 	movq	%rax, %rbx			# Copy token end index
 	cmpq	$0, %rdx			# Empty token means end of string
-	je	calculate_return		# So end function
+	je	calculate_end			# So end function
 
 	cmpq	$1, %rdx			# Token can't be an operand if it's longer than 1 char
 	ja	calculate_loop_function
@@ -150,23 +150,25 @@ calculate_loop_end:
 	movq	%rbx, %rcx			# Update counter to end index of substring
 	jmp	calculate_loop			# Jump to the start of the loop
 
-calculate_return:				# Return with success code
+calculate_end:					# Return with success code
 	call	pop_to_fpu
 	cmpq	$-1, %rax			# If pop returned error
 	je	calculate_parsing_error		# Return parsing error
+	cmpq	$0, stack_counter		# If stack counter is not equal 0
+	jne	calculate_parsing_error		# Return parsing error
 	movq	$1, %rax			# Status - return number
-	ret
+	jmp	calculate_return
 
 calculate_parsing_error:			# Return with -1 code
 	movq	$-1, %rax
-	jmp	calculate_error
+	jmp	calculate_return
 
 calculate_fpu_error:				# Return with -2 code
 	fclex					# Clean error flags
 	movq	$-2, %rax
-	jmp	calculate_error
+	jmp	calculate_return
 
-calculate_error:				# Clean stack and return with error code
+calculate_return:				# Clean stack and return
 	movq	$0, %rbx			# Clean rbx
 	movl	stack_counter, %ebx		# Copy stack counter to rbx
 	shlq	$3, %rbx			# Multiply by 8 bytes
