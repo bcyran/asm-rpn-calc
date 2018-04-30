@@ -102,10 +102,20 @@ calculate_loop_cos:				# Cosine
 
 calculate_loop_abs:				# Absolute value
 	cmpl	%eax, fx_abs
-	jne	calculate_loop_number
+	jne	calculate_loop_setp
 	call	pop_to_fpu
 	fabs
 	jmp	calculate_loop_end
+
+calculate_loop_setp:				# Set precision
+	cmpl	%eax, fx_setp
+	jne	calculate_loop_number
+	call	pop_to_fpu
+	fistpl	-8(%rsp)
+	movl	-8(%rsp), %eax
+	movl	%eax, precision
+	fldz
+	ret
 
 calculate_loop_number:
 	pushq	%rdi				# Convert token to float

@@ -42,7 +42,7 @@ repl:
 	call	calculate			# Calculate value of the expression
 
 	movq	$output, %rdi			# Parameter for ftoa (output buffer)
-	movl	precision, %esi		# Parameter for ftoa (precision)
+	movl	precision, %esi			# Parameter for ftoa (precision)
 	call	ftoa				# Convert result to ASCII string
 
 	movq	$output, %rdi			# Parameter for print_string (buffer to print)
