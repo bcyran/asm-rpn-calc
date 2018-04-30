@@ -35,12 +35,12 @@ calculate_loop:
 	je	calculate_return		# So end function
 
 	cmpq	$1, %rdx			# Token can't be an operand if it's longer than 1 char
-	ja	calculate_loop_number
+	ja	calculate_loop_function
 	cmpb	$'0', cur_token			# It's operand if it's beyond 0
 	jb	calculate_loop_operand
 	cmpb	$'9', cur_token			# It's operand if it's above 9
 	ja	calculate_loop_operand
-	jmp	calculate_loop_number		# Otherwise it's a number
+	jmp	calculate_loop_function		# Otherwise it's a function or number
 
 calculate_loop_operand:
 	call	pop_to_fpu			# Pop two arguments from the stack
@@ -70,10 +70,34 @@ calculate_loop_div:				# Division
 	fdivp
 	jmp	calculate_loop_end
 
-calculate_loop_pow:
+calculate_loop_pow:				# Exponentiation
 	cmpb	$'^', cur_token
 	jne	calculate_loop_number
 	call	float_pow
+	jmp	calculate_loop_end
+
+calculate_loop_function:			# Functions
+	movl	cur_token, %eax			# Copy current token to eax for comparison
+
+calculate_loop_sqrt:				# Square root
+	cmpl	%eax, fx_sqrt
+	jne	calculate_loop_sin
+	call	pop_to_fpu
+	fsqrt
+	jmp	calculate_loop_end
+	
+calculate_loop_sin:				# Sine
+	cmpl	%eax, fx_sin
+	jne	calculate_loop_cos
+	call	pop_to_fpu
+	fsin
+	jmp	calculate_loop_end
+
+calculate_loop_cos:				# Cosine
+	cmpl	%eax, fx_cos
+	jne	calculate_loop_number
+	call	pop_to_fpu
+	fcos
 	jmp	calculate_loop_end
 
 calculate_loop_number:

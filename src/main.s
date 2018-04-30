@@ -15,6 +15,11 @@
 	prompt: .ascii "> "
 	prompt_len = . - prompt			# Length of the prompt
 
+	# Function names
+	fx_sqrt: .ascii "sqrt"			# Square root
+	fx_sin: .ascii "sin\0"			# Sine
+	fx_cos: .ascii "cos\0"			# Cosine
+
 #
 # Uninitialized data
 #
@@ -38,6 +43,9 @@
 	.global input
 	.global cur_token
 	.global tmp
+	.global	fx_sqrt
+	.global	fx_sin
+	.global fx_cos
 
 #
 # Entry point
