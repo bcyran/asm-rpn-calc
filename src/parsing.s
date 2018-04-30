@@ -154,7 +154,7 @@ calculate_end:					# Return with success code
 	call	pop_to_fpu
 	cmpq	$-1, %rax			# If pop returned error
 	je	calculate_parsing_error		# Return parsing error
-	cmpq	$0, stack_counter		# If stack counter is not equal 0
+	cmpl	$0, stack_counter		# If stack counter is not equal 0
 	jne	calculate_parsing_error		# Return parsing error
 	movq	$1, %rax			# Status - return number
 	jmp	calculate_return
