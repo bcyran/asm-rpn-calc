@@ -27,7 +27,7 @@
 #
 # return:
 #	st0 - result
-#	rax - status: 1 - return number, 0 - no return, -1 - error
+#	rax - status: 1 - return number, 0 - no return, -1 - parsing error, -2 - fpu error
 #
 calculate:
 	movq	$0, %rcx			# Initialize counter
@@ -137,11 +137,15 @@ calculate_loop_number:
 	call	atof
 	popq	%rdi
 	cmpq	$-1, %rax			# If atof returned error
-	je	calculate_error			# Return error
+	je	calculate_parsing_error		# Return parsing error
 	
 calculate_loop_end:
 	cmpq	$-1, %rax			# If one of the pops returned error
-	je	calculate_error			# Return error
+	je	calculate_parsing_error		# Return parsing error
+	fstsw	%ax				# Store FPU status word in ax
+	andw	$0b0000000000111111, %ax	# Clean all flags besides error summary
+	cmpw	$0, %ax				# If error summary flag is set
+	jne	calculate_fpu_error		# Return FPU error
 	call	push_from_fpu			# Push new number or result to the stack
 	movq	%rbx, %rcx			# Update counter to end index of substring
 	jmp	calculate_loop			# Jump to the start of the loop
@@ -149,17 +153,25 @@ calculate_loop_end:
 calculate_return:				# Return with success code
 	call	pop_to_fpu
 	cmpq	$-1, %rax			# If pop returned error
-	je	calculate_error			# Return error
+	je	calculate_parsing_error		# Return parsing error
 	movq	$1, %rax			# Status - return number
 	ret
 
-calculate_error:				# Return with error code
-	movq	$0, %rax			# Clean rax
-	movl	stack_counter, %eax		# Copy stack counter to rax
-	shlq	$3, %rax			# Multiply by 8 bytes
-	addq	%rax, %rsp			# Remove elements from the stack
-	movq	$0, stack_counter		# Clean stack counter
+calculate_parsing_error:			# Return with -1 code
 	movq	$-1, %rax
+	jmp	calculate_error
+
+calculate_fpu_error:				# Return with -2 code
+	fclex					# Clean error flags
+	movq	$-2, %rax
+	jmp	calculate_error
+
+calculate_error:				# Clean stack and return with error code
+	movq	$0, %rbx			# Clean rbx
+	movl	stack_counter, %ebx		# Copy stack counter to rbx
+	shlq	$3, %rbx			# Multiply by 8 bytes
+	addq	%rbx, %rsp			# Remove elements from the stack
+	movq	$0, stack_counter		# Clean stack counter
 	ret
 
 #

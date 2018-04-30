@@ -210,7 +210,7 @@ atoi_return:
 #	rdi - address of output buffer
 #	rsi - precision of the conversion (number of decimal places)
 # return:
-#	rax - length of the output string
+#	rax - length of the output string or -1 on overflow
 #
 ftoa:
 	pushq	%rbx				# Backup registers
@@ -255,6 +255,12 @@ ftoa_number:
 
 	movq	$0, -8(%rsp)			# Clear red zone
 	fistpq	-8(%rsp)			# Store number in red zone
+
+	fstsw	%ax				# Store FPU status word in ax
+	andw	$1, %ax				# Clean all bits besides invalid operation (IE)
+	cmpw	$1, %ax				# Check if IE is set
+	je	ftoa_overflow			# Return error if it's set
+
 	movq	-8(%rsp), %rax			# Move number to the accumulator
 	
 	cmpq	$0, %rax			# If number is not negative
@@ -330,13 +336,16 @@ leading_zeros:					# Add missing leading zeros to fraction e.g. 0.1 -> 0.0001
 
 ftoa_return:
 	movq	%rcx, %rax			# Return length of the string
-
 	popq	%r8				# Restore registers
 	popq	%rdx
 	popq	%rcx
 	popq	%rbx
-		
 	ret
+
+ftoa_overflow:					# Return with code -1
+	fclex					# Clean error flags
+	movq	$-1, %rcx
+	jmp	ftoa_return
 
 #
 # Converts integer to ASCII string

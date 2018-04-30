@@ -26,6 +26,14 @@
 	error_msg: .ascii "Niepoprawne wyrażenie!\n"
 	error_msg_len = . - error_msg		# Length
 
+	# FPU error message
+	fpu_error_msg: .ascii "Błąd FPU!\n"
+	fpu_error_msg_len = . - fpu_error_msg
+
+	# Overflow error message
+	ov_error_msg: .ascii "Przepełnienie!\n"
+	ov_error_msg_len = . - fpu_error_msg
+
 .text
 
 #
@@ -59,12 +67,18 @@ repl:
 	cmpq	$0, %rax			# If calculate status is "no return"
 	je	repl				# Jump to the start of the loop
 	
-	cmpq	$-1, %rax			# If calulcate status is "error"
+	cmpq	$-1, %rax			# If calulcate status is parsing error
 	je	repl_error			# Display error message
+
+	cmpq	$-2, %rax			# If calculate status is FPU error
+	je	repl_fpu_error			# Display error message
 
 	movq	$output, %rdi			# Parameter for ftoa (output buffer)
 	movl	precision, %esi			# Parameter for ftoa (precision)
 	call	ftoa				# Convert result to ASCII string
+	
+	cmpq	$-1, %rax			# If ftoa return status is -1
+	je	repl_ov_error			# Display overflow error
 
 	movq	$output, %rdi			# Parameter for print_string (buffer to print)
 	movq	%rax, %rsi			# Parameter fro print_string (number of char to print)
@@ -72,12 +86,23 @@ repl:
 
 	jmp	repl				# Jump to the start of the loop
 
-repl_error:
+repl_error:					# Display parsing error message
 	movq	$error_msg, %rdi
 	movq	$error_msg_len, %rsi
 	call	print_string
 	jmp	repl
-	ret
+
+repl_fpu_error:					# Display FPU error message
+	movq	$fpu_error_msg, %rdi
+	movq	$fpu_error_msg_len, %rsi
+	call	print_string
+	jmp	repl
+
+repl_ov_error:					# Display overflow error message
+	movq	$ov_error_msg, %rdi
+	movq	$ov_error_msg_len, %rsi
+	call	print_string
+	jmp	repl
 
 #
 # Shows greeting text
