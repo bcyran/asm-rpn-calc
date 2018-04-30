@@ -142,6 +142,11 @@ calculate_return:				# Return with success code
 	ret
 
 calculate_error:				# Return with error code
+	movq	$0, %rax			# Clean rax
+	movl	stack_counter, %eax		# Copy stack counter to rax
+	shlq	$3, %rax			# Multiply by 8 bytes
+	addq	%rax, %rsp			# Remove elements from the stack
+	movq	$0, stack_counter		# Clean stack counter
 	movq	$-1, %rax
 	ret
 
