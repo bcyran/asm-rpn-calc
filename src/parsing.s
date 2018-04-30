@@ -129,7 +129,7 @@ calculate_loop_setp:				# Set precision
 	movl	%eax, precision
 	fldz
 	movq	$0, %rax			# Status - no return
-	ret
+	jmp	calculate_return
 
 calculate_loop_number:
 	pushq	%rdi				# Convert token to float
