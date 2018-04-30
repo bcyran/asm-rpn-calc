@@ -124,6 +124,8 @@ calculate_loop_setp:				# Set precision
 	cmpl	%eax, fx_setp
 	jne	calculate_loop_number
 	call	pop_to_fpu
+	cmpq	$-1, %rax			# If pop returned error
+	je	calculate_parsing_error		# Return parsing error
 	fistpl	-8(%rsp)
 	movl	-8(%rsp), %eax
 	movl	%eax, precision
