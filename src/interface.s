@@ -41,6 +41,9 @@ repl:
 	movq	$input, %rdi			# Parameter for calculate (input buffer)
 	call	calculate			# Calculate value of the expression
 
+	cmpq	$0, %rax			# If calculate status is "no return"
+	je	repl				# Jump to the start of the loop
+
 	movq	$output, %rdi			# Parameter for ftoa (output buffer)
 	movl	precision, %esi			# Parameter for ftoa (precision)
 	call	ftoa				# Convert result to ASCII string

@@ -15,6 +15,7 @@
 #
 # return:
 #	st0 - result
+#	rax - status: 1 - return number, 0 - no return, -1 - error
 #
 calculate:
 	movq	$0, %rcx			# Initialize counter
@@ -115,6 +116,7 @@ calculate_loop_setp:				# Set precision
 	movl	-8(%rsp), %eax
 	movl	%eax, precision
 	fldz
+	movq	$0, %rax			# Status - no return
 	ret
 
 calculate_loop_number:
@@ -130,6 +132,7 @@ calculate_loop_end:
 
 calculate_return:
 	call	pop_to_fpu
+	movq	$1, %rax			# Status - return number
 	ret
 
 #
