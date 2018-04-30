@@ -120,7 +120,8 @@ atof_frac_loop_end:
 	call	int_pow				# Calculate denominator by raising 10 to powwer od fraction counter
 	movq	%rax, -8(%rsp)			# Move denominator to memory for FPU division
 
-	fidiv	-8(%rsp)			# Divide numerator in st0 by denominator
+	fildq	-8(%rsp)			# Load denominator
+	fdivp					# Divide numerator by denominator
 	faddp					# Add fraction part in st0  to the integer part in st1
 
 atof_sign:
@@ -250,7 +251,8 @@ ftoa_number:
 	movq	%rax, -8(%rsp)			# Put denominator in stack's red zone
 	movq	%rax, %rbx			# Save denominator for later division
 
-	fimul	-8(%rsp)			# Multiply number by fraction denominator
+	fildq	-8(%rsp)			# Load denominator into FPU
+	fmulp					# Multiply number by fraction denominator
 	frndint					# Round the number to the nearest integer
 
 	movq	$0, -8(%rsp)			# Clear red zone
