@@ -15,7 +15,13 @@
 	prompt: .ascii "> "
 	prompt_len = . - prompt			# Length of the prompt
 
-	precision: .int 2
+	# Expression error
+	error_msg: .ascii "Niepoprawne wyrażenie!\n"
+	error_msg_len = . - error_msg		# Length
+
+	precision: .int 2			# Default calculation precision
+
+	stack_counter: .int 0			# RPN stack counter
 	
 	# Function names
 	fx_sqrt: .ascii "sqrt"			# Square root
@@ -44,10 +50,13 @@
 	.global greeting_len
 	.global prompt
 	.global	prompt_len
+	.global error_msg
+	.global error_msg_len
 	.global input
 	.global cur_token
 	.global tmp
 	.global precision
+	.global stack_counter
 	.global	fx_sqrt
 	.global	fx_sin
 	.global fx_cos

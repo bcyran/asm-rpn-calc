@@ -33,8 +33,18 @@ clear_buffer_return:
 #
 # Pops float number from the stack and pushes it to FPU
 #
+# return:
+#	rax - status: 1 - success, -1 - error
+#
 pop_to_fpu:
+	cmpl	$0, stack_counter		# If stack is not empty
+	jne	pop_to_fpu_continue		# Continue popping
+	movq	$-1, %rax
+	ret					# Otherwise return with error code
+pop_to_fpu_continue:
 	fldl	8(%rsp)				# Skip return address and load number to FPU
+	decl	stack_counter
+	movq	$1, %rax
 	ret	$8				# Return and free 8 bytes left after popping float
 
 #
@@ -45,5 +55,6 @@ push_from_fpu:
 	movq	%rax, -8(%rsp)			# copying return address 8 bytes lower
 	subq	$8, %rsp			# Move stack pointer accordingly
 	fstpl	8(%rsp)				# Store float in created space
+	incl	stack_counter
 	ret					# Return to moved address
 

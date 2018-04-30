@@ -124,15 +124,25 @@ calculate_loop_number:
 	movq	$cur_token, %rdi
 	call	atof
 	popq	%rdi
+	cmpq	$-1, %rax			# If atof returned error
+	je	calculate_error			# Return error
 	
 calculate_loop_end:
+	cmpq	$-1, %rax			# If one of the pops returned error
+	je	calculate_error			# Return error
 	call	push_from_fpu			# Push new number or result to the stack
 	movq	%rbx, %rcx			# Update counter to end index of substring
 	jmp	calculate_loop			# Jump to the start of the loop
 
-calculate_return:
+calculate_return:				# Return with success code
 	call	pop_to_fpu
+	cmpq	$-1, %rax			# If pop returned error
+	je	calculate_error			# Return error
 	movq	$1, %rax			# Status - return number
+	ret
+
+calculate_error:				# Return with error code
+	movq	$-1, %rax
 	ret
 
 #

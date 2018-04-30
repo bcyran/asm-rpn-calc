@@ -17,6 +17,7 @@
 #	rdi - address of buffer containing ASCII string
 # return:
 #	st0 - value of number stored in string
+#	rax - status: 1 - success, -1 - error
 #
 atof:
 	pushq	%rsi				# Backup registers used by the function
@@ -47,10 +48,12 @@ atof_int_loop:					# Get integer part of the nuber
 	je	atof_int_loop_end
 	cmpb	$'\n', %bl			# End if char is newline
 	je	atof_int_loop_end
-	cmpb	$'0', %bl			# End if char is lower than 0
-	jb	atof_int_loop_end
-	cmpb	$'9', %bl			# End if char is greater than 9
-	ja	atof_int_loop_end
+	cmpb	$0, %bl				# End if char is \0
+	je	atof_int_loop_end
+	cmpb	$'0', %bl			# Return error if char is lower than 0
+	jb	atof_error
+	cmpb	$'9', %bl			# Return error if char is greater than 9
+	ja	atof_error
 	
 	movb	%bl, tmp(, %rdx, 1)		# Copy char to temporary buffer
 
@@ -82,10 +85,12 @@ atof_frac_loop:					# Extract fraction part of the number
 	
 	cmpb	$'\n', %bl			# End if char is newline
 	je	atof_frac_loop_end
-	cmpb	$'0', %bl			# End if char is lower than 0
-	jb	atof_frac_loop_end
-	cmpb	$'9', %bl			# End if char is greater than 9
-	ja	atof_frac_loop_end
+	cmpb	$0, %bl				# End if char is \0
+	je	atof_frac_loop_end
+	cmpb	$'0', %bl			# Return error if char is lower than 0
+	jb	atof_error
+	cmpb	$'9', %bl			# Return error if char is greater than 9
+	ja	atof_error
 
 	movb	%bl, tmp(, %rdx, 1)		# Copy char to temporary buffer
 
@@ -118,6 +123,16 @@ atof_return:
 	popq	%r8
 	popq	%rcx
 	popq	%rsi
+	movq	$1, %rax
+	ret
+
+atof_error:					# Return with error code
+	popq	%rdx
+	popq	%rbx
+	popq	%r8
+	popq	%rcx
+	popq	%rsi
+	movq	$-1, %rax
 	ret
 
 #

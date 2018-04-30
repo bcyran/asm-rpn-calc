@@ -43,6 +43,9 @@ repl:
 
 	cmpq	$0, %rax			# If calculate status is "no return"
 	je	repl				# Jump to the start of the loop
+	
+	cmpq	$-1, %rax			# If calulcate status is "error"
+	je	repl_error			# Display error message
 
 	movq	$output, %rdi			# Parameter for ftoa (output buffer)
 	movl	precision, %esi			# Parameter for ftoa (precision)
@@ -53,6 +56,12 @@ repl:
 	call	print_string			# Print result
 
 	jmp	repl				# Jump to the start of the loop
+
+repl_error:
+	movq	$error_msg, %rdi
+	movq	$error_msg_len, %rsi
+	call	print_string
+	jmp	repl
 	ret
 
 #
